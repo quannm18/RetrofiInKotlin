@@ -1,0 +1,44 @@
+package com.example.retrofiinkotlin
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.retrofiinkotlin.viewmodel.MainActivityViewModel
+import com.example.retrofiinkotlin.viewmodel.adapter.RecycleViewAdapter
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.flow.collectLatest
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var rcvAdapter : RecycleViewAdapter
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        //B4: Khởi tạo rcv
+        initRcv()
+        //BX: Khởi tạo ViewModel
+        initViewModel()
+    }
+
+    private fun initRcv(){
+        rcvMain.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            val decoration = DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL)
+
+            addItemDecoration(decoration)
+            rcvAdapter = RecycleViewAdapter()
+            adapter = rcvAdapter
+        }
+    }
+    private fun initViewModel (){
+        val viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
+        lifecycleScope.launchWhenCreated {
+            viewModel.getListData().collectLatest {
+                rcvAdapter.submitData(it)
+            }
+        }
+    }
+}
